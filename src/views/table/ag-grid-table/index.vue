@@ -5,13 +5,14 @@
       :gridOptions="gridOptions"
       :rowData="rowData"
       :columnDefs="colDefs"
+      @grid-ready="onGridReady"
       style="height: 500px"
     />
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue"
+import { computed, onMounted, ref, watch } from "vue"
 
 import { AgGridVue } from "ag-grid-vue3"
 import "ag-grid-community/styles/ag-grid.css"
@@ -26,6 +27,10 @@ const rowData = ref([
   { make: "Honda", model: "Civic", price: 22350, electric: false, user_id: [3] },
   { make: "BMW", model: "3 Series", price: 41450, electric: false, user_id: [1, 3] }
 ])
+const gridApi = ref(null)
+const onGridReady = (params) => {
+  gridApi.value = params.api
+}
 
 const gridOptions = {
   defaultColDef: {
@@ -42,6 +47,10 @@ const gridOptions = {
   singleClickEdit: true,
   // 禁止右键菜单
   suppressContextMenu: true
+  // components: {
+  //   agAntdMultiSelectCellEditor,
+  //   agAntdMultiSelectRenderer
+  // }
 }
 
 const optionsList = ref([])
@@ -53,6 +62,10 @@ onMounted(() => {
       { label: "李四", value: 2 },
       { label: "王五", value: 3 }
     ]
+
+    gridApi.value?.setGridOption("columnDefs", colDefs.value)
+    gridApi.value?.setGridOption("rowData", rowData.value)
+    // gridApi.value?.refreshCells({ force: true })
   }, 3000)
 })
 
@@ -73,26 +86,34 @@ const getOptions = () => {
   })
 }
 
-const colDefs = ref([
-  {
-    headerName: "汽车品牌",
-    field: "make",
-    width: 150
-  },
-  // 使用自定义渲染器和编辑器
-  {
-    headerName: "用户",
-    field: "user_id",
-    editable: true,
-    cellRenderer: agAntdMultiSelectRenderer,
-    cellEditor: agAntdMultiSelectCellEditor,
-    cellEditorParams: {
-      // values: [1, 2, 3]
+const colDefs = computed(() => {
+  return [
+    {
+      headerName: "汽车品牌",
+      field: "make",
+      width: 150
     },
-    getOptions,
-    width: 150
-  }
-])
+    // 使用自定义渲染器和编辑器
+    {
+      headerName: "用户",
+      field: "user_id",
+      editable: true,
+      cellRenderer: "agAntdMultiSelectRenderer",
+      cellEditor: "agAntdMultiSelectCellEditor",
+      cellEditorParams: {
+        // values: [1, 2, 3]
+      },
+      optionsList: optionsList.value,
+      getOptions,
+      width: 150
+    }
+  ]
+})
+
+defineExpose({
+  agAntdMultiSelectRenderer,
+  agAntdMultiSelectCellEditor
+})
 </script>
 
 <style lang="scss" scoped></style>

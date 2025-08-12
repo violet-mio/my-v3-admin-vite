@@ -26,14 +26,16 @@ const displayText = computed(() => {
 })
 
 const initValue = async () => {
-  if (typeof props.params?.colDef?.getOptions === "function") {
-    options.value = await props.params.colDef.getOptions()
-  }
+  // if (typeof props.params?.colDef?.getOptions === "function") {
+  //   options.value = await props.params.colDef.getOptions()
+  // }
+  options.value = props.params?.colDef?.optionsList || []
 }
 
 onMounted(() => {
   value.value = props.params.value
   initValue()
+  console.log("props.params initValue", props.params)
 })
 
 const refresh = (params) => {}
