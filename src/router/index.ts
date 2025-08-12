@@ -129,6 +129,15 @@ export const constantRoutes: RouteRecordRaw[] = [
           title: "Vxe Table",
           keepAlive: true
         }
+      },
+      {
+        path: "ag-grid-table",
+        component: () => import("@/views/table/ag-grid-table/index.vue"),
+        name: "AgGridTable",
+        meta: {
+          title: "AgGridTable",
+          keepAlive: true
+        }
       }
     ]
   },
