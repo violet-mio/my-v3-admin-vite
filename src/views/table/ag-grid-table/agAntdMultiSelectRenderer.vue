@@ -1,14 +1,11 @@
 <template>
-  <template v-for="(item, index) of value" :key="item">
-    <span>{{ labelMap[item] || item }}<span v-if="index < value.length - 1">,</span></span>
-  </template>
+  <span>{{ displayText }}</span>
 </template>
-
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 
 const value = ref([])
-const labelMap = ref([])
+const options = ref([])
 
 const props = defineProps({
   params: {
@@ -16,9 +13,27 @@ const props = defineProps({
   }
 })
 
+const displayText = computed(() => {
+  if (!value.value || value.value.length === 0) {
+    return ""
+  }
+  if (!options.value || options.value.length === 0) {
+    return value.value.join(", ")
+  }
+
+  const labelList = options.value.filter((item) => value.value.includes(item.value))
+  return labelList.map((item) => item.label).join(", ")
+})
+
+const initValue = async () => {
+  if (typeof props.params?.colDef?.getOptions === "function") {
+    options.value = await props.params.colDef.getOptions()
+  }
+}
+
 onMounted(() => {
   value.value = props.params.value
-  labelMap.value = props.params.colDef.refData || {}
+  initValue()
 })
 
 const refresh = (params) => {}
@@ -28,4 +43,4 @@ defineExpose({
 })
 </script>
 
-<style scoped></style>
+<style scoped />

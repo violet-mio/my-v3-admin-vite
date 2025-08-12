@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { onMounted, ref, watch } from "vue"
 
 import { AgGridVue } from "ag-grid-vue3"
 import "ag-grid-community/styles/ag-grid.css"
@@ -44,30 +44,40 @@ const gridOptions = {
   suppressContextMenu: true
 }
 
-// Column Definitions: Defines the columns to be displayed.
+const optionsList = ref([])
+onMounted(() => {
+  // 使用promise和定时器mock请求
+  setTimeout(() => {
+    optionsList.value = [
+      { label: "张三", value: 1 },
+      { label: "李四", value: 2 },
+      { label: "王五", value: 3 }
+    ]
+  }, 3000)
+})
+
+// 提供一个获取选项的方法
+const getOptions = () => {
+  return new Promise((resolve) => {
+    if (optionsList.value.length > 0) {
+      resolve(optionsList.value)
+    } else {
+      // 监听数据变化
+      const unwatch = watch(optionsList, (newVal) => {
+        if (newVal.length > 0) {
+          resolve(optionsList.value)
+          unwatch() // 数据获取后取消监听
+        }
+      })
+    }
+  })
+}
+
 const colDefs = ref([
   {
     headerName: "汽车品牌",
     field: "make",
     width: 150
-  },
-  {
-    headerName: "汽车型号",
-    field: "model",
-    width: 150,
-    cellEditor: "agTextCellEditor"
-  },
-  {
-    headerName: "价格",
-    field: "price",
-    width: 120,
-    valueFormatter: (params) => `$${params.value.toLocaleString()}`
-  },
-  {
-    headerName: "电动汽车",
-    field: "electric",
-    cellRenderer: (params) => (params.value ? "是" : "否"),
-    width: 120
   },
   // 使用自定义渲染器和编辑器
   {
@@ -77,16 +87,11 @@ const colDefs = ref([
     cellRenderer: agAntdMultiSelectRenderer,
     cellEditor: agAntdMultiSelectCellEditor,
     cellEditorParams: {
-      values: [1, 2, 3]
+      // values: [1, 2, 3]
     },
-    refData: {
-      1: "张三",
-      2: "李四",
-      3: "王五"
-    },
+    getOptions,
     width: 150
   }
-  // 省略其他列配置
 ])
 </script>
 

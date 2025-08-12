@@ -23,15 +23,13 @@ const getValue = () => {
   return value.value
 }
 
-const initValue = () => {
+const initValue = async () => {
   value.value = props.params.value
-  const labelMap = props.params.colDef.refData || {}
-  options.value = props.params.values.map((item) => {
-    return {
-      label: labelMap[item] || item,
-      value: item
-    }
-  })
+  console.log("props.params", props.params)
+  // 处理异步获取选项数据
+  if (typeof props.params?.colDef?.getOptions === "function") {
+    options.value = await props.params.colDef.getOptions()
+  }
 }
 
 onMounted(() => {
